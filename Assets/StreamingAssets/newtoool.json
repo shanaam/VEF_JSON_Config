@@ -1,0 +1,88 @@
+{
+    "experiment_mode": "tool_vr",
+    "per_block_type": [
+        "instruction",
+        "instruction",
+        "instruction"
+    ],
+    "per_block_rotation": [
+        0,
+        0,
+        0
+    ],
+    "per_block_n": [
+        0,
+        0,
+        0
+    ],
+    "per_block_hand": [
+        "r",
+        "r",
+        "r"
+    ],
+    "per_block_targetListToUse": [
+        "",
+        "",
+        ""
+    ],
+    "per_block_visual_feedback": [
+        false,
+        false,
+        false
+    ],
+    "per_block_surface_materials": [
+        "",
+        "",
+        ""
+    ],
+    "per_block_list_tool_type": [
+        "",
+        "",
+        ""
+    ],
+    "per_block_surface_dynamic_friction": [
+        "%float%",
+        0,
+        0
+    ],
+    "per_block_surface_static_friction": [
+        "%float%",
+        0,
+        0
+    ],
+    "per_block_tool_dynamic_friction": [
+        "%float%",
+        0,
+        0
+    ],
+    "per_block_tool_static_friction": [
+        "%float%",
+        0,
+        0
+    ],
+    "per_block_track_score": [
+        false,
+        false,
+        false
+    ],
+    "per_block_timerTime": [
+        "%float%",
+        0,
+        0
+    ],
+    "per_block_tilt_after_fire": [
+        false,
+        false,
+        false
+    ],
+    "per_block_list_camera_tilt": [
+        "",
+        "",
+        ""
+    ],
+    "per_block_list_surface_tilt": [
+        "",
+        "",
+        ""
+    ]
+}
