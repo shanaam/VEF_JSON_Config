@@ -115,6 +115,7 @@ public class ConfigurationUIManager : MonoBehaviour
             file => (file.Name != MASTER_JSON_FILENAME && file.Name != EXPERIMENT_PARAMETERS)).ToArray();
 
         List<Dropdown.OptionData> fileOptions = new List<Dropdown.OptionData>();
+        fileOptions.Add(new Dropdown.OptionData("Click here to open a file."));
         foreach (FileInfo f in files)
         {
             fileOptions.Add(new Dropdown.OptionData(f.Name));
@@ -202,7 +203,7 @@ public class ConfigurationUIManager : MonoBehaviour
     /// <param name="index"></param>
     public void OpenFile(int index)
     {
-        currentFile = files[index].FullName;
+        currentFile = files[index - 1].FullName;
 
         if (dirty)
         {

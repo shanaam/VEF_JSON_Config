@@ -16,6 +16,11 @@ public class ClickableInfoTxt : MonoBehaviour, IPointerClickHandler, IPointerEnt
 
     public bool hovered = true;
 
+
+    /// <summary>
+    /// Executes when user clicks on a ui object that this script is attached to. 
+    /// If the mouse clicks on a TMP link, then invoke the OnClick event.
+    /// </summary>
     public void OnPointerClick(PointerEventData eventData)
     {
         var text = InfoText.GetComponent<TextMeshProUGUI>();
@@ -37,6 +42,7 @@ public class ClickableInfoTxt : MonoBehaviour, IPointerClickHandler, IPointerEnt
 
     void Update()
     {
+        /// If the mouse hovers on a TMP link, then invoke the OnHover event.
         if (hovered)
         {
             var text = InfoText.GetComponent<TextMeshProUGUI>();
@@ -60,5 +66,6 @@ public class ClickableInfoTxt : MonoBehaviour, IPointerClickHandler, IPointerEnt
     public void OnPointerExit(PointerEventData eventData)
     {
         hovered = false;
+        OnHover.Invoke(-1);
     }
 }

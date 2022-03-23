@@ -39,43 +39,26 @@ public class ConfigurationBlockManager : MonoBehaviour
 
     public PopUp PopUpManager;
 
+    public enum BlockType
+    {
+        Selected,
+        Normal,
+        Aligned,
+        Rotated,
+        Clamped
+    }
+
+    readonly static Dictionary<BlockType, ColorBlock> BlockColours = new Dictionary<BlockType, ColorBlock>()
+    {
+        {BlockType.Selected, ColourPaletteHelper.SetColourPalette(Color.yellow, 1)},
+        {BlockType.Normal, ColourPaletteHelper.SetColourPalette(Color.white, 1)},
+        {BlockType.Aligned, ColourPaletteHelper.SetColourPalette(Color.red, .9f)},
+        {BlockType.Rotated, ColourPaletteHelper.SetColourPalette(Color.green, .75f)},
+        {BlockType.Clamped, ColourPaletteHelper.SetColourPalette(Color.blue, 0.5f)},
+    };
+
     public void Start()
     {
-        normalColourPalette.normalColor = Color.white;
-        normalColourPalette.selectedColor = Color.white;
-        normalColourPalette.disabledColor = new Color(0.78f, 0.78f, 0.78f, 0.5f);
-        normalColourPalette.pressedColor = new Color(0.78f, 0.78f, 0.78f);
-        normalColourPalette.highlightedColor = new Color(0.96f, 0.96f, 0.96f);
-        normalColourPalette.colorMultiplier = 1.0f;
-
-        alignedColourPalette.normalColor = new Color(1f, .8f, .8f);
-        alignedColourPalette.selectedColor = new Color(1f, .8f, .8f);
-        alignedColourPalette.disabledColor = new Color(1, 0.78f, 0.78f, 0.5f);
-        alignedColourPalette.pressedColor = new Color(1, 0.76f, 0.76f);
-        alignedColourPalette.highlightedColor = new Color(1, 0.76f, 0.76f);
-        alignedColourPalette.colorMultiplier = 1.0f;
-
-        rotatedColourPalette.normalColor = new Color(.8f, 1, .8f);
-        rotatedColourPalette.selectedColor = new Color(.8f, 1, .8f);
-        rotatedColourPalette.disabledColor = new Color(0.78f, 1, 0.78f, 0.5f);
-        rotatedColourPalette.pressedColor = new Color(0.76f, 1, 0.76f);
-        rotatedColourPalette.highlightedColor = new Color(0.76f, 1, 0.76f);
-        rotatedColourPalette.colorMultiplier = 1.0f;
-
-        clampedColourPalette.normalColor = new Color(.8f, .8f, 1);
-        clampedColourPalette.selectedColor = new Color(.8f, .8f, 1);
-        clampedColourPalette.disabledColor = new Color(0.78f, 0.78f, 1, 0.5f);
-        clampedColourPalette.pressedColor = new Color(0.76f, 0.78f, 1);
-        clampedColourPalette.highlightedColor = new Color(0.76f, 0.78f, 1);
-        clampedColourPalette.colorMultiplier = 1.0f;
-
-        selectedColourPalette.normalColor = new Color(1f, 0.85f, 0.49f);
-        selectedColourPalette.selectedColor = selectedColourPalette.normalColor;
-        selectedColourPalette.pressedColor = Color.yellow;
-        selectedColourPalette.highlightedColor = Color.yellow;
-        selectedColourPalette.disabledColor = new Color(0.78f, 0.78f, 0.78f, 0.5f);
-        selectedColourPalette.colorMultiplier = 1.0f;
-
         Vector3[] corners = new Vector3[4];
         GetComponent<RectTransform>().GetWorldCorners(corners);
         blockViewLeftSide = corners[0].x;
@@ -193,7 +176,7 @@ public class ConfigurationBlockManager : MonoBehaviour
             GameObject block = g.GetComponent<BlockComponent>().Block;
             if (SelectedBlocks.Contains(g))
             {
-                block.GetComponent<Button>().colors = selectedColourPalette;
+                block.GetComponent<Button>().colors = BlockColours[BlockType.Selected];
 
                 SelectedBlockText.GetComponent<Text>().text +=
                     g.GetComponent<BlockComponent>().BlockID + ", ";
@@ -201,13 +184,13 @@ public class ConfigurationBlockManager : MonoBehaviour
             else
             {
                 if (newList[g.GetComponent<BlockComponent>().BlockID].Equals("aligned"))
-                    block.GetComponent<Button>().colors = alignedColourPalette;
+                    block.GetComponent<Button>().colors = BlockColours[BlockType.Aligned];
                 else if (newList[g.GetComponent<BlockComponent>().BlockID].Equals("rotated"))
-                    block.GetComponent<Button>().colors = rotatedColourPalette;
+                    block.GetComponent<Button>().colors = BlockColours[BlockType.Rotated];
                 else if (newList[g.GetComponent<BlockComponent>().BlockID].Equals("clamped"))
-                    block.GetComponent<Button>().colors = clampedColourPalette;
+                    block.GetComponent<Button>().colors = BlockColours[BlockType.Clamped];
                 else
-                    block.GetComponent<Button>().colors = normalColourPalette;
+                    block.GetComponent<Button>().colors = BlockColours[BlockType.Normal];
             }
 
         }
@@ -232,21 +215,21 @@ public class ConfigurationBlockManager : MonoBehaviour
             GameObject notch = g.GetComponent<BlockComponent>().Notch;
             if (SelectedNotches.Contains(notch))
             {
-                notch.GetComponent<Button>().colors = selectedColourPalette;
+                notch.GetComponent<Button>().colors = BlockColours[BlockType.Selected];
             }
             else
             {
-                notch.GetComponent<Button>().colors = normalColourPalette;
+                notch.GetComponent<Button>().colors = BlockColours[BlockType.Normal];
             }
         }
 
         if (SelectedNotches.Contains(anchorNotch))
         {
-            anchorNotch.GetComponent<Button>().colors = selectedColourPalette;
+            anchorNotch.GetComponent<Button>().colors = BlockColours[BlockType.Selected]; ;
         }
         else
         {
-            anchorNotch.GetComponent<Button>().colors = normalColourPalette;
+            anchorNotch.GetComponent<Button>().colors = BlockColours[BlockType.Normal];
         }
     }
 

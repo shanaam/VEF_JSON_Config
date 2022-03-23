@@ -30,6 +30,13 @@ public class PopUp : MonoBehaviour
         {MessageType.Neutral, new Color(0.5f, 0.5f, 0.5f)}
     };
 
+
+    /// <summary>
+    /// Shows a popup with custom text that disapears after 5 seconds. 
+    /// </summary>
+    /// <param name="message">The text included in the popup</param>
+    /// <param name="type">The type of message (positive, negative, neutral). 
+    /// Affects the colour of the popup, as outlined in this script's dictionary</param>
     public void ShowPopup(string message, MessageType type = MessageType.Neutral)
     {
         NumActivePopups++;
@@ -41,7 +48,7 @@ public class PopUp : MonoBehaviour
         StartCoroutine(DecrementPopups());
     }
 
-    IEnumerator DecrementPopups()
+    private IEnumerator DecrementPopups()
     {
         yield return new WaitForSeconds(PopUpTime);
         NumActivePopups--;

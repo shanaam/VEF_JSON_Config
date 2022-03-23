@@ -107,8 +107,15 @@ public class BlockPanel : MonoBehaviour
 
     public void OnHoverOption(int option)
     {
-        hoveredParameter = PropertySelectionDropdown.GetComponent<Dropdown>().options[option].text;
-
+        if (option < 0)
+        {
+            hoveredParameter = string.Empty;
+        }
+        else
+        {
+            hoveredParameter = PropertySelectionDropdown.GetComponent<Dropdown>().options[option].text;
+        }
+       
         UpdateBlockPropertyText();
     }
 
