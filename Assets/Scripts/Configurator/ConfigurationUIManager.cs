@@ -37,6 +37,9 @@ public class ConfigurationUIManager : MonoBehaviour
 
     public TipManager tipManager;
 
+    // Tracks whether a file has been opened or not
+    public bool fileOpen = false;
+
     /// <summary>
     /// Public accessor for "dirty" variable. When the variable is modified
     /// We also let the user know via updating the UI
@@ -115,7 +118,8 @@ public class ConfigurationUIManager : MonoBehaviour
             file => (file.Name != MASTER_JSON_FILENAME && file.Name != EXPERIMENT_PARAMETERS)).ToArray();
 
         List<Dropdown.OptionData> fileOptions = new List<Dropdown.OptionData>();
-        fileOptions.Add(new Dropdown.OptionData("Click here to open a file."));
+        //Add default option because otherwise first option isn't clickable
+        fileOptions.Add(new Dropdown.OptionData("Click here to open a file.")); 
         foreach (FileInfo f in files)
         {
             fileOptions.Add(new Dropdown.OptionData(f.Name));
@@ -124,6 +128,7 @@ public class ConfigurationUIManager : MonoBehaviour
         FileDropdown.GetComponent<Dropdown>().ClearOptions();
         FileDropdown.GetComponent<Dropdown>().options.AddRange(fileOptions);
 
+        //Set text to let the user know what to do (The text from the first option isn't visible)
         FileDropdown.GetComponentInChildren<Text>().text = "Click here to open a file.";
     }
 
@@ -203,7 +208,17 @@ public class ConfigurationUIManager : MonoBehaviour
     /// <param name="index"></param>
     public void OpenFile(int index)
     {
-        currentFile = files[index - 1].FullName;
+        if (!fileOpen)
+        {
+            //Remove first default option if first time opening file
+            fileOpen = true;
+            index--;
+            FileDropdown.GetComponent<Dropdown>().options.RemoveAt(0); //remove default option
+            FileDropdown.GetComponent<Dropdown>().value--; //fixes visual bug where it looked like the next file in list is selected
+        }
+ 
+        currentFile = files[index].FullName;
+        
 
         if (dirty)
         {

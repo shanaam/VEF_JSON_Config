@@ -185,13 +185,27 @@ public class ExperimentContainer
         // If the input is a number
         if (input.Length > 0 && input.All(char.IsDigit))
         {
-            return int.Parse(input);
+            try
+            {
+                return int.Parse(input);
+            }
+            catch (System.OverflowException e)
+            {
+                return false;
+            }
         }
 
         Regex rx = new Regex(@"[+-]?([0-9]*[.])?[0-9]+");
         if (rx.IsMatch(input) && !input.Any(x => !char.IsLetter(x)))
         {
-            return float.Parse(input);
+            try
+            {
+                return float.Parse(input);
+            }
+            catch (System.OverflowException e)
+            {
+                return false;
+            }
         }
 
 

@@ -27,9 +27,6 @@ public class ConfigurationBlockManager : MonoBehaviour
     public HashSet<GameObject> SelectedNotches = new HashSet<GameObject>();
     public HashSet<GameObject> CopiedBlocks = new HashSet<GameObject>();
 
-    private ColorBlock selectedColourPalette, normalColourPalette;
-    private ColorBlock alignedColourPalette, rotatedColourPalette, clampedColourPalette;
-
     private const float BLOCK_SPACING = 110f;
     private const float INITIAL_OFFSET = -390f;
 
@@ -52,9 +49,9 @@ public class ConfigurationBlockManager : MonoBehaviour
     {
         {BlockType.Selected, ColourPaletteHelper.SetColourPalette(Color.yellow, 1)},
         {BlockType.Normal, ColourPaletteHelper.SetColourPalette(Color.white, 1)},
-        {BlockType.Aligned, ColourPaletteHelper.SetColourPalette(Color.red, .9f)},
-        {BlockType.Rotated, ColourPaletteHelper.SetColourPalette(Color.green, .75f)},
-        {BlockType.Clamped, ColourPaletteHelper.SetColourPalette(Color.blue, 0.5f)},
+        {BlockType.Aligned, ColourPaletteHelper.SetColourPalette(Color.red, 0.75f)},
+        {BlockType.Rotated, ColourPaletteHelper.SetColourPalette(Color.green, 0.75f)},
+        {BlockType.Clamped, ColourPaletteHelper.SetColourPalette(Color.blue, 0.75f)},
     };
 
     public void Start()
@@ -81,7 +78,7 @@ public class ConfigurationBlockManager : MonoBehaviour
         }
 
         Blocks.Clear();
-        SelectedBlocks.Clear();
+        CopiedBlocks.Clear();
 
         List<object> per_block_type = expContainer.Data["per_block_type"] as List<object>;
 
@@ -113,8 +110,8 @@ public class ConfigurationBlockManager : MonoBehaviour
                 () => { OnNotchPress(blckCmp.Notch); });
         }
 
-        UpdateBlockButtons();
         UnselectAll();
+        UpdateBlockButtons();
     }
 
     void Update()

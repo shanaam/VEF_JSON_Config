@@ -99,6 +99,7 @@ public class BlockPanel : MonoBehaviour
         else
         {
             TextInputField.SetActive(true);
+            TextInputField.GetComponent<InputField>().text = "";
             DropdownInputField.SetActive(false);
         }
 

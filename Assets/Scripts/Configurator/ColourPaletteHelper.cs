@@ -18,7 +18,7 @@ public static class ColourPaletteHelper
         {
             normalColor = colour,
             selectedColor = colour,
-            disabledColor = colour * 18f + fullAlpha,
+            disabledColor = colour * .18f + fullAlpha,
             pressedColor = colour * .18f + fullAlpha,
             highlightedColor = colour * .25f + fullAlpha,
             colorMultiplier = colourMultiplier
