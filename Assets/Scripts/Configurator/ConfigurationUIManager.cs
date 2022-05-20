@@ -264,9 +264,7 @@ public class ConfigurationUIManager : MonoBehaviour
         foreach (KeyValuePair<string, object> kp in globalParameters)
         {
             if (!fileParameters.ContainsKey(kp.Key))
-            {
                 fileParameters.Add(kp.Key, kp.Value);
-            }
         }
 
         ExpContainer = new ExperimentContainer(fileParameters, currentParameters);
@@ -340,6 +338,7 @@ public class ConfigurationUIManager : MonoBehaviour
 
         foreach (KeyValuePair<string, object> kp in globalParameters)
         {
+
             temp.Add(kp.Key, kp.Value);
         }
 
