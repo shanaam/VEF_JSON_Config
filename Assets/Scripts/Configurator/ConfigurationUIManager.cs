@@ -62,6 +62,8 @@ public class ConfigurationUIManager : MonoBehaviour
 
     private Dictionary<string, object> currentParameters = new Dictionary<string, object>();
 
+    private Dictionary<string, object> globalParameters;
+
     // The zero based index representing which block is currently selected by the user to modify
     public int CurrentSelectedBlock;
 
@@ -103,6 +105,17 @@ public class ConfigurationUIManager : MonoBehaviour
         else
         {
             Debug.LogWarning("Default Parameters JSON does not exist.");
+        }
+
+        path = Application.dataPath + "/StreamingAssets/global_parameters.json";
+        if (File.Exists(path))
+        {
+            globalParameters = (Dictionary<string, object>)MiniJSON.Json.Deserialize(File.ReadAllText(
+                path));
+        }
+        else
+        {
+            Debug.LogWarning("Global Parameters JSON does not exist.");
         }
 
         GetFiles();
@@ -248,6 +261,14 @@ public class ConfigurationUIManager : MonoBehaviour
 
         CreateParameterList(exp_type);
 
+        foreach (KeyValuePair<string, object> kp in globalParameters)
+        {
+            if (!fileParameters.ContainsKey(kp.Key))
+            {
+                fileParameters.Add(kp.Key, kp.Value);
+            }
+        }
+
         ExpContainer = new ExperimentContainer(fileParameters, currentParameters);
 
         // Default to show the block tab
@@ -316,6 +337,11 @@ public class ConfigurationUIManager : MonoBehaviour
 
         Dictionary<string, object> temp = new Dictionary<string, object>();
         temp.Add("experiment_mode", ParametersDropdown.options[ParametersDropdown.value].text);
+
+        foreach (KeyValuePair<string, object> kp in globalParameters)
+        {
+            temp.Add(kp.Key, kp.Value);
+        }
 
         ExpContainer = new ExperimentContainer(temp, currentParameters);
 

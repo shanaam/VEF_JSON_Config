@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.EventSystems;
+using System.Text.RegularExpressions;
 
 public class PropertyPanel : MonoBehaviour
 {
@@ -35,8 +36,8 @@ public class PropertyPanel : MonoBehaviour
 
     public void SaveProperty()
     {
-        PropertyName = NameInput.text;
-        PropertyValue = ValueInput.text;
+        PropertyName = Regex.Replace(NameInput.text, @"\s+", ""); //Replaces all(+) space characters (\s) with empty("");
+        PropertyValue = Regex.Replace(ValueInput.text, @"\s+", "");
 
         List<string> tempList = new List<string>();
         tempList.AddRange(PropertyValue.Split(','));
