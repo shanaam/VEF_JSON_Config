@@ -85,7 +85,7 @@ public class ConfigurationUIManager : MonoBehaviour
 
         
 
-        string path = Application.dataPath + "/StreamingAssets/experiment_parameters.json";
+        string path = Application.dataPath + "/StreamingAssets/Parameters/experiment_parameters.json";
         if (File.Exists(path))
         {
             masterParameters = (Dictionary<string, object>)MiniJSON.Json.Deserialize(File.ReadAllText(
@@ -96,7 +96,7 @@ public class ConfigurationUIManager : MonoBehaviour
             Debug.LogWarning("Master JSON does not exist.");
         }
 
-        path = Application.dataPath + "/StreamingAssets/default_parameters.json";
+        path = Application.dataPath + "/StreamingAssets/Parameters/default_parameters.json";
         if (File.Exists(path))
         {
             defaultParameters = (Dictionary<string, object>)MiniJSON.Json.Deserialize(File.ReadAllText(
@@ -107,7 +107,7 @@ public class ConfigurationUIManager : MonoBehaviour
             Debug.LogWarning("Default Parameters JSON does not exist.");
         }
 
-        path = Application.dataPath + "/StreamingAssets/global_parameters.json";
+        path = Application.dataPath + "/StreamingAssets/Parameters/global_parameters.json";
         if (File.Exists(path))
         {
             globalParameters = (Dictionary<string, object>)MiniJSON.Json.Deserialize(File.ReadAllText(
