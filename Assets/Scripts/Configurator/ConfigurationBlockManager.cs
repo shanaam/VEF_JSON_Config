@@ -79,6 +79,8 @@ public class ConfigurationBlockManager : MonoBehaviour
 
         Blocks.Clear();
         CopiedBlocks.Clear();
+        SelectedBlocks.Clear();
+        SelectedNotches.Clear();
 
         List<object> per_block_type = expContainer.Data["per_block_type"] as List<object>;
 
@@ -134,6 +136,7 @@ public class ConfigurationBlockManager : MonoBehaviour
         }
         else
         {
+            //Select All input
             if (Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.A))
             {
                 if (SelectedBlocks.Count != Blocks.Count)
@@ -148,10 +151,12 @@ public class ConfigurationBlockManager : MonoBehaviour
                     UpdateBlockButtons();
                 }
             }
+            //Copy input
             else if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.C))
             {
                 CopyBlocks();
             }
+            //Paste input
             else if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.V))
             {
                 PasteBlocks();
@@ -470,65 +475,7 @@ public class ConfigurationBlockManager : MonoBehaviour
     /// </summary>
     public void AddBlock()
     {
-        // Instantiate prefab that represents the block in the UI
-        List<object> per_block_type = expContainer.Data["per_block_type"] as List<object>;
-        GameObject g = Instantiate(BlockPrefab, Content.transform);
-        g.name = "Block " + per_block_type.Count;
-
-        /*
-        g.transform.position = new Vector3(
-            INITIAL_OFFSET + (per_block_type.Count * BLOCK_SPACING), 0f, 0f) + transform.position;
-        */
-
-        g.transform.SetSiblingIndex(per_block_type.Count);
-
-        BlockComponent blckCmp = g.GetComponent<BlockComponent>();
-
-        blckCmp.BlockController = this;
-        blckCmp.BlockID = per_block_type.Count;
-        g.transform.SetAsLastSibling();
-
-        // Note: We set block ID before adding another block to the dictionary because
-        // block ID is zero based and the count will be 1 off after the GameObject
-        // is set up.
-        foreach (KeyValuePair<string, object> kp in expContainer.Data)
-        {
-            if (kp.Key.StartsWith("per_block"))
-            {
-                List<object> per_block_list = expContainer.Data[kp.Key] as List<object>;
-                object o = expContainer.GetDefaultValue(kp.Key);
-
-                // The default value of 
-                if (o is IList && o.GetType().IsGenericType &&
-                    o.GetType().GetGenericTypeDefinition().IsAssignableFrom(typeof(List<>)))
-                {
-                    per_block_list.Add((o as List<object>)[0]);
-                }
-                else
-                {
-                    per_block_list.Add(o);
-                }
-            }
-        }
-
-        blckCmp.Block.GetComponentInChildren<Text>().text =
-            g.name + "\n" + per_block_type[per_block_type.Count - 1];
-
-        uiManager.Dirty = true;
-
-        // Add listener for onClick function
-        blckCmp.Block.GetComponent<Button>().onClick.AddListener(
-            () => { uiManager.OnClickBlock(g); });
-
-        blckCmp.Block.GetComponent<Button>().onClick.AddListener(
-                () => { OnClickBlock(g); });
-
-        blckCmp.Notch.GetComponent<Button>().onClick.AddListener(
-            () => { OnNotchPress(blckCmp.Notch); });
-
-        Blocks.Add(g);
-
-        uiManager.BlockPanel.GetComponent<BlockPanel>().Populate(per_block_type.Count - 1);
+        InsertNewBlock();
 
         PopUpManager.ShowPopup("New block added to the end of the list.", PopUp.MessageType.Positive);
     }
@@ -622,86 +569,107 @@ public class ConfigurationBlockManager : MonoBehaviour
         {
             foreach (GameObject notch in SelectedNotches)
             {
-                // Instantiate prefab that represents the block in the UI
-                List<object> per_block_type = expContainer.Data["per_block_type"] as List<object>;
-                GameObject g = Instantiate(BlockPrefab, Content.transform);
-                g.name = "Block " + per_block_type.Count;
-                /*
-                g.transform.position = new Vector3(
-                                           INITIAL_OFFSET + (per_block_type.Count * BLOCK_SPACING), 0f, 0f) +
-                                       transform.position;
-                */
-                BlockComponent blckCmp = g.GetComponent<BlockComponent>();
-
-                blckCmp.BlockController = this;
-
-
-                int insertIndex = 0;
-                if (notch.name.Equals("AnchorNotch"))
-                {
-                    insertIndex = 0;
-                }
-                else
-                {
-                    insertIndex = notch.GetComponentInParent<BlockComponent>().BlockID;
-                }
-
-                //int insertIndex = notch.GetComponentInParent<BlockComponent>().BlockID;
-                g.transform.SetSiblingIndex(insertIndex + 1);
-
-                // Note: We set block ID before adding another block to the dictionary because
-                // block ID is zero based and the count will be 1 off after the GameObject
-                // is set up.
-                foreach (KeyValuePair<string, object> kp in expContainer.Data)
-                {
-                    if (kp.Key.StartsWith("per_block"))
-                    {
-                        List<object> per_block_list = expContainer.Data[kp.Key] as List<object>;
-                        object o = expContainer.GetDefaultValue(kp.Key);
-
-                        // The default value of 
-                        if (o is IList && o.GetType().IsGenericType &&
-                            o.GetType().GetGenericTypeDefinition().IsAssignableFrom(typeof(List<>)))
-                        {
-                            per_block_list.Insert(insertIndex, (o as List<object>)[0]);
-                        }
-                        else
-                        {
-                            per_block_list.Insert(insertIndex, o);
-                        }
-                    }
-                }
-
-                //per_block_type[insertIndex] = "instruction";
-
-                uiManager.Dirty = true;
-
-                // Add listener for onClick function
-                blckCmp.Block.GetComponent<Button>().onClick.AddListener(
-                    () => { uiManager.OnClickBlock(g); });
-
-                blckCmp.Block.GetComponent<Button>().onClick.AddListener(
-                    () => { OnClickBlock(g); });
-
-                blckCmp.Notch.GetComponent<Button>().onClick.AddListener(
-                    () => { OnNotchPress(blckCmp.Notch); });
-
-                Blocks.Insert(insertIndex + 1, g);
-
-                //OnEndDrag(g);
-
+                InsertNewBlock(notch);
             }
-
-            ResetBlockText();
+            PopUpManager.ShowPopup("New block inserted.", PopUp.MessageType.Positive);
         }
         else
         {
-            AddBlock();
+            InsertNewBlock();
+            PopUpManager.ShowPopup("New block added to the end of the list.", PopUp.MessageType.Positive);
         }
-        ResetBlockText();
+    }
 
+    public void InsertNewBlock(GameObject notch = null, GameObject copiedBlock = null, int count = 0)
+    {
+        // Instantiate prefab that represents the block in the UI
+        List<object> per_block_type = expContainer.Data["per_block_type"] as List<object>;
+        GameObject g = Instantiate(BlockPrefab, Content.transform);
+        g.name = "Block " + per_block_type.Count;
+
+        BlockComponent blckCmp = g.GetComponent<BlockComponent>();
+
+        blckCmp.BlockController = this;
+
+        int insertIndex = 0;
+        if (notch != null)
+        {
+            
+            if (notch.name.Equals("AnchorNotch"))
+            {
+                insertIndex = -1;
+            }
+            else
+            {
+                insertIndex = notch.GetComponentInParent<BlockComponent>().BlockID + count;
+            }
+            g.transform.SetSiblingIndex(insertIndex + 2);
+        }
+        else
+        {
+            //if no specified notch, send to end of list
+            insertIndex = per_block_type.Count - 1;
+            g.transform.SetSiblingIndex(per_block_type.Count);
+        }
+
+        // Note: We set block ID before adding another block to the dictionary because
+        // block ID is zero based and the count will be 1 off after the GameObject
+        // is set up.
+        foreach (KeyValuePair<string, object> kp in expContainer.Data)
+        {
+            if (kp.Key.StartsWith("per_block"))
+            {
+                List<object> per_block_list = expContainer.Data[kp.Key] as List<object>;
+
+                object o = copiedBlock != null ?
+                    (per_block_list[copiedBlock.GetComponent<BlockComponent>().BlockID]) :
+                    expContainer.GetDefaultValue(kp.Key); //copy from copied block, or from blank
+
+                // The default value of 
+                if (o is IList && o.GetType().IsGenericType &&
+                    o.GetType().GetGenericTypeDefinition().IsAssignableFrom(typeof(List<>)))
+                {
+                    per_block_list.Insert(insertIndex + 1, (o as List<object>)[0]);
+                }
+                else
+                {
+                    per_block_list.Insert(insertIndex + 1, o);
+                }
+            }
+        }
+
+        uiManager.Dirty = true;
+
+        // Add listener for onClick function
+        blckCmp.Block.GetComponent<Button>().onClick.AddListener(
+            () => { uiManager.OnClickBlock(g); });
+
+        blckCmp.Block.GetComponent<Button>().onClick.AddListener(
+            () => { OnClickBlock(g); });
+
+        blckCmp.Notch.GetComponent<Button>().onClick.AddListener(
+            () => { OnNotchPress(blckCmp.Notch); });
+
+        Blocks.Insert(insertIndex + 1, g);
+
+
+        var newList = expContainer.Data["per_block_type"] as List<object>;
+
+        // Fix numbering for the new block orientation
+        for (int i = 0; i < Blocks.Count; i++)
+        {
+            Blocks[i].name = "Block " + i;
+            BlockComponent blockCmp = Blocks[i].GetComponent<BlockComponent>();
+            blockCmp.BlockID = i;
+            blockCmp.Block.GetComponentInChildren<Text>().text = Blocks[i].name + "\n" + newList[i];
+
+            Blocks[i].transform.SetSiblingIndex(i);
+        }
+
+        ResetBlockText();
         UpdateBlockButtons();
     }
+
 
     /// <summary>
     /// Sets block name, id, displayed text based on block index and per block type.
@@ -765,7 +733,6 @@ public class ConfigurationBlockManager : MonoBehaviour
                 PopUpManager.ShowPopup("Nothing is Copied.", PopUp.MessageType.Negative);
                 return;
             }
-                
 
             IEnumerable<GameObject> query = CopiedBlocks.OrderBy(pet => pet.name);
 
@@ -779,85 +746,7 @@ public class ConfigurationBlockManager : MonoBehaviour
             int count = 0;
             foreach (GameObject copiedBlock in query)
             {
-                // Instantiate prefab that represents the block in the UI
-                List<object> per_block_type = expContainer.Data["per_block_type"] as List<object>;
-                GameObject g = Instantiate(BlockPrefab, Content.transform);
-                g.name = "Block " + per_block_type.Count;
-
-                BlockComponent blckCmp = g.GetComponent<BlockComponent>();
-
-                blckCmp.BlockController = this;
-
-                int insertIndex = 0;
-
-                if (notch.name.Equals("AnchorNotch"))
-                {
-                    insertIndex = -1;
-                }
-                else
-                {
-                    insertIndex = notch.GetComponentInParent<BlockComponent>().BlockID + count;
-                }
-                g.transform.SetSiblingIndex(insertIndex + 2);
-
-                // Note: We set block ID before adding another block to the dictionary because
-                // block ID is zero based and the count will be 1 off after the GameObject
-                // is set up.
-                foreach (KeyValuePair<string, object> kp in expContainer.Data)
-                {
-                    if (kp.Key.StartsWith("per_block"))
-                    {
-                        List<object> per_block_list = expContainer.Data[kp.Key] as List<object>;
-                        //object o = expContainer.GetDefaultValue(kp.Key);
-                        //copiedBlock.GetComponent<BlockComponent>()
-
-                        object o = (per_block_list[copiedBlock.GetComponent<BlockComponent>().BlockID]);
-
-                        // The default value of 
-                        if (o is IList && o.GetType().IsGenericType &&
-                            o.GetType().GetGenericTypeDefinition().IsAssignableFrom(typeof(List<>)))
-                        {
-                            per_block_list.Insert(insertIndex + 1, (o as List<object>)[0]);
-                        }
-                        else
-                        {
-                            per_block_list.Insert(insertIndex + 1, o);
-                        }
-                    }
-                }
-
-                uiManager.Dirty = true;
-
-                // Add listener for onClick function
-                blckCmp.Block.GetComponent<Button>().onClick.AddListener(
-                    () => { uiManager.OnClickBlock(g); });
-
-                blckCmp.Block.GetComponent<Button>().onClick.AddListener(
-                    () => { OnClickBlock(g); });
-
-                blckCmp.Notch.GetComponent<Button>().onClick.AddListener(
-                    () => { OnNotchPress(blckCmp.Notch); });
-
-                Blocks.Insert(insertIndex + 1, g);
-
-
-                var newList = expContainer.Data["per_block_type"] as List<object>;
-
-                // Fix numbering for the new block orientation
-                for (int i = 0; i < Blocks.Count; i++)
-                {
-                    Blocks[i].name = "Block " + i;
-                    BlockComponent blockCmp = Blocks[i].GetComponent<BlockComponent>();
-                    blockCmp.BlockID = i;
-                    blockCmp.Block.GetComponentInChildren<Text>().text = Blocks[i].name + "\n" + newList[i];
-
-                    Blocks[i].transform.SetSiblingIndex(i);
-                    /*
-                    Blocks[i].GetComponent<RectTransform>().position = new Vector3(
-                        INITIAL_OFFSET + (BLOCK_SPACING * i), 0f, 0f) + GetComponent<RectTransform>().position;
-                    */
-                }
-
+                InsertNewBlock(notch, copiedBlock, count);
                 count++;
             }
 
