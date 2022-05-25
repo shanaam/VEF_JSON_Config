@@ -25,7 +25,7 @@ public class ConfigurationBlockManager : MonoBehaviour
 
     public HashSet<GameObject> SelectedBlocks = new HashSet<GameObject>();
     public HashSet<GameObject> SelectedNotches = new HashSet<GameObject>();
-    public HashSet<GameObject> CopiedBlocks = new HashSet<GameObject>();
+    public List<Dictionary<string, object>> CopiedBlocks = new List<Dictionary<string, object>>();
 
     private const float BLOCK_SPACING = 110f;
     private const float INITIAL_OFFSET = -390f;
@@ -149,15 +149,41 @@ public class ConfigurationBlockManager : MonoBehaviour
                     UpdateBlockButtons();
                 }
             }
-            //Copy input
+            //Copy shortcut
             else if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.C))
             {
                 CopyBlocks();
             }
-            //Paste input
+            //Paste shortcut
             else if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.V))
             {
                 PasteBlocks();
+            }
+            //Cut shortcut
+            else if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.X))
+            {
+                CopyBlocks();
+                RemoveBlock();
+            }
+            //Delete shortcut
+            else if (Input.GetKeyDown(KeyCode.Delete))
+            {
+                RemoveBlock();
+            }
+            //New block / insert shortcut
+            else if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.N))
+            {
+                InsertInstructions();
+            }
+            //Undo shortcut
+            else if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Z))
+            {
+                //UNDO
+            }
+            //Redo shortcut
+            else if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Y))
+            {
+                //REDO
             }
         }
     }
@@ -369,10 +395,6 @@ public class ConfigurationBlockManager : MonoBehaviour
             {
                 if (Blocks[i].transform.position.x < mousePosition.x)
                 {
-                    /*
-                    Blocks[i].transform.position = new Vector3(
-                        INITIAL_OFFSET + (j * BLOCK_SPACING), 0f, 0f) + transform.position;
-                    */
                     Blocks[i].transform.SetSiblingIndex(j);
                     j++;
                 }
@@ -392,10 +414,6 @@ public class ConfigurationBlockManager : MonoBehaviour
         {
             if (!SelectedBlocks.Contains(Blocks[i]))
             {
-                /*
-                Blocks[i].transform.position = new Vector3(
-                    INITIAL_OFFSET + (j * BLOCK_SPACING), 0f, 0f) + transform.position;
-                */
                 Blocks[i].transform.SetSiblingIndex(j);
                 j++;
             }
@@ -476,6 +494,9 @@ public class ConfigurationBlockManager : MonoBehaviour
             return;
         }
 
+        PopUpManager.ShowPopup("Block Deleted.", PopUp.MessageType.Positive);
+
+
         foreach (GameObject block in SelectedBlocks)
         {
             int blockToRemove = block.GetComponent<BlockComponent>().BlockID;
@@ -505,8 +526,8 @@ public class ConfigurationBlockManager : MonoBehaviour
 
             // Every block to the right of the block that was removed must be readjusted as
             // their indexes are no longer correct
-            //List<object> per_block_type = expContainer.Data["per_block_type"] as List<object>;
-            ReadjustBlocks(blockToRemove, Blocks.Count);
+            //ReadjustBlocks(blockToRemove + 1, Blocks.Count);
+            ReadjustBlocks();
 
             // Loads the currently selected block
             if (Blocks.Count > 0)
@@ -550,7 +571,7 @@ public class ConfigurationBlockManager : MonoBehaviour
         }
     }
 
-    public void InsertNewBlock(GameObject notch = null, GameObject copiedBlock = null, int count = 0)
+    public void InsertNewBlock(GameObject notch = null, Dictionary<string, object> copiedBlock = null, int count = 0)
     {
         // Instantiate prefab that represents the block in the UI
         List<object> per_block_type = expContainer.Data["per_block_type"] as List<object>;
@@ -591,9 +612,13 @@ public class ConfigurationBlockManager : MonoBehaviour
             {
                 List<object> per_block_list = expContainer.Data[kp.Key] as List<object>;
 
+                /* object o = copiedBlock != null ?
+                     (per_block_list[copiedBlock.GetComponent<BlockComponent>().BlockID]) :
+                     expContainer.GetDefaultValue(kp.Key); //get from copied block, or from default*/
+
                 object o = copiedBlock != null ?
-                    (per_block_list[copiedBlock.GetComponent<BlockComponent>().BlockID]) :
-                    expContainer.GetDefaultValue(kp.Key); //copy from copied block, or from blank
+                   copiedBlock[kp.Key] :
+                   expContainer.GetDefaultValue(kp.Key); //get from copied block, or from default
 
                 // The default value of 
                 if (o is IList && o.GetType().IsGenericType &&
@@ -636,8 +661,8 @@ public class ConfigurationBlockManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Fix numbering for the new block orientation.
-    /// Readjust indexes of blocks.
+    /// Fix numbering for the new block orientation. Readjust indexes of blocks.
+    /// Sets block name, id, displayed text based on block index and per block type.
     /// </summary>
     public void ReadjustBlocks(int start, int end)
     {
@@ -655,24 +680,6 @@ public class ConfigurationBlockManager : MonoBehaviour
             Blocks[i].transform.SetSiblingIndex(i);
         }
     }
-
-    /// <summary>
-    /// Sets block name, id, displayed text based on block index and per block type.
-    /// </summary>
-   /* public void ResetBlockText()
-    {
-
-
-        List<object> per_block_type = uiManager.ExpContainer.Data["per_block_type"] as List<object>;
-
-        for (int i = 0; i < Blocks.Count; i++)
-        {
-            Blocks[i].name = "Block " + i;
-            Blocks[i].GetComponent<BlockComponent>().BlockID = i;
-            Blocks[i].GetComponent<BlockComponent>().Block.GetComponentInChildren<Text>().text =
-                Blocks[i].name + "\n" + per_block_type[i];
-        }
-    }*/
 
     /// <summary>
     /// Updates the text display for the currently selected block if
@@ -694,7 +701,22 @@ public class ConfigurationBlockManager : MonoBehaviour
     public void CopyBlocks()
     {
         CopiedBlocks.Clear();
-        CopiedBlocks = new HashSet<GameObject>(SelectedBlocks, SelectedBlocks.Comparer);
+
+        // Make a deep copy of the data of each block
+        foreach (GameObject b in SelectedBlocks)
+        {
+            Dictionary<string, object> CopiedParams = new Dictionary<string, object>();
+            foreach (KeyValuePair<string, object> kp in expContainer.Data)
+            {
+                if (kp.Key.StartsWith("per_block"))
+                {
+                    List<object> per_block_list = expContainer.Data[kp.Key] as List<object>;
+
+                    CopiedParams.Add(kp.Key, per_block_list[b.GetComponent<BlockComponent>().BlockID]);
+                }
+            }
+            CopiedBlocks.Add(CopiedParams);
+        }
 
         if (SelectedBlocks.Count > 0)
         {
@@ -721,7 +743,7 @@ public class ConfigurationBlockManager : MonoBehaviour
                 return;
             }
 
-            IEnumerable<GameObject> query = CopiedBlocks.OrderBy(pet => pet.name);
+            //IEnumerable<GameObject> query = CopiedBlocks.OrderBy(pet => pet.name);
 
             // Finds currently selected notch
             GameObject notch = null;
@@ -731,9 +753,9 @@ public class ConfigurationBlockManager : MonoBehaviour
             }
 
             int count = 0;
-            foreach (GameObject copiedBlock in query)
+            foreach (Dictionary<string, object> dic in CopiedBlocks)
             {
-                InsertNewBlock(notch, copiedBlock, count);
+                InsertNewBlock(notch, dic, count);
                 count++;
             }
 
