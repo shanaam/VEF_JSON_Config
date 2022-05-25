@@ -79,8 +79,6 @@ public class ConfigurationBlockManager : MonoBehaviour
 
         Blocks.Clear();
         CopiedBlocks.Clear();
-        SelectedBlocks.Clear();
-        SelectedNotches.Clear();
 
         List<object> per_block_type = expContainer.Data["per_block_type"] as List<object>;
 
@@ -467,6 +465,7 @@ public class ConfigurationBlockManager : MonoBehaviour
         }
 
         uiManager.Dirty = true;
+        //Dummy.SetActive(false);
     }
 
     /// <summary>
