@@ -85,7 +85,7 @@ public class ConfigurationUIManager : MonoBehaviour
 
         
 
-        string path = Application.dataPath + "/StreamingAssets/experiment_parameters.json";
+        string path = Application.dataPath + "/StreamingAssets/Parameters/experiment_parameters.json";
         if (File.Exists(path))
         {
             masterParameters = (Dictionary<string, object>)MiniJSON.Json.Deserialize(File.ReadAllText(
@@ -96,7 +96,7 @@ public class ConfigurationUIManager : MonoBehaviour
             Debug.LogWarning("Master JSON does not exist.");
         }
 
-        path = Application.dataPath + "/StreamingAssets/default_parameters.json";
+        path = Application.dataPath + "/StreamingAssets/Parameters/default_parameters.json";
         if (File.Exists(path))
         {
             defaultParameters = (Dictionary<string, object>)MiniJSON.Json.Deserialize(File.ReadAllText(
@@ -107,7 +107,7 @@ public class ConfigurationUIManager : MonoBehaviour
             Debug.LogWarning("Default Parameters JSON does not exist.");
         }
 
-        path = Application.dataPath + "/StreamingAssets/global_parameters.json";
+        path = Application.dataPath + "/StreamingAssets/Parameters/global_parameters.json";
         if (File.Exists(path))
         {
             globalParameters = (Dictionary<string, object>)MiniJSON.Json.Deserialize(File.ReadAllText(
@@ -257,30 +257,19 @@ public class ConfigurationUIManager : MonoBehaviour
 
         string exp_type = fileParameters["experiment_mode"].ToString();
 
-        Debug.Log(exp_type);
-
         CreateParameterList(exp_type);
 
         foreach (KeyValuePair<string, object> kp in globalParameters)
         {
             if (!fileParameters.ContainsKey(kp.Key))
-            {
                 fileParameters.Add(kp.Key, kp.Value);
-            }
         }
 
         ExpContainer = new ExperimentContainer(fileParameters, currentParameters);
 
-        // Default to show the block tab
-        PropertyTab.SetActive(false);
-        BlockTab.SetActive(true);
-
-        BlockView.GetComponent<ConfigurationBlockManager>().InitializeBlockPrefabs(this, ExpContainer);
-
-        BlockPanel.GetComponent<BlockPanel>().Start();
+        Reset();
 
         tipManager.SetTip(TipManager.TipType.OpenFile);
-
 
         // TODO: Set up property editor
         /*
@@ -340,6 +329,7 @@ public class ConfigurationUIManager : MonoBehaviour
 
         foreach (KeyValuePair<string, object> kp in globalParameters)
         {
+
             temp.Add(kp.Key, kp.Value);
         }
 
@@ -380,10 +370,12 @@ public class ConfigurationUIManager : MonoBehaviour
 
         Dirty = true;
 
-        BlockView.GetComponent<ConfigurationBlockManager>().InitializeBlockPrefabs(this, ExpContainer);
+        Reset();
+
         FileDropdown.GetComponent<Dropdown>().value = 0;
 
-        BlockPanel.GetComponent<BlockPanel>().Start();
+        //Clear dropdown text in case a file was previously open
+        FileDropdown.GetComponentInChildren<Text>().text = "";
     }
 
     /// <summary>
@@ -511,10 +503,13 @@ public class ConfigurationUIManager : MonoBehaviour
     /// </summary>
     public void SwapMode()
     {
+        if (!fileOpen)
+            return;
+
         BlockTab.SetActive(!BlockTab.activeSelf);
         PropertyTab.SetActive(!PropertyTab.activeSelf);
 
-        if (SwapModeButton.GetComponentInChildren<Text>().text.Equals("Mode: Block"))
+        if (!BlockTab.activeSelf)
         {
             SwapModeButton.GetComponentInChildren<Text>().text = "Mode: Properties";
         }
@@ -546,5 +541,22 @@ public class ConfigurationUIManager : MonoBehaviour
                 currentParameters.Add(parameter, masterParameters[parameter]);
             }
         }
+    }
+
+    /// <summary>
+    /// Adds all parameters in masterParameters that are associated with experimentType to currentParameters.
+    /// Called when opening a new file, 
+    /// </summary>
+    public void Reset()
+    {
+        // Default to show the block tab
+        BlockTab.SetActive(true);
+        PropertyTab.SetActive(false);
+        SwapModeButton.GetComponentInChildren<Text>().text = "Mode: Block";
+
+
+        BlockView.GetComponent<ConfigurationBlockManager>().InitializeBlockPrefabs(this, ExpContainer);
+
+        BlockPanel.GetComponent<BlockPanel>().Start();
     }
 }
