@@ -447,25 +447,11 @@ public class ConfigurationBlockManager : MonoBehaviour
 
         var newList = expContainer.Data["per_block_type"] as List<object>;
 
-        //TODO: Amalgamate with ResetBlockText()
-
         // Fix numbering for the new block orientation
-        for (int i = 0; i < Blocks.Count; i++)
-        {
-            Blocks[i].name = "Block " + i;
-            BlockComponent blckCmp = Blocks[i].GetComponent<BlockComponent>();
-            blckCmp.BlockID = i;
-            blckCmp.Block.GetComponentInChildren<Text>().text = Blocks[i].name + "\n" + newList[i];
-
-            Blocks[i].transform.SetSiblingIndex(i);
-            /*
-            Blocks[i].GetComponent<RectTransform>().position = new Vector3(
-                INITIAL_OFFSET + (BLOCK_SPACING * i), 0f, 0f) + GetComponent<RectTransform>().position;
-            */
-        }
+        ReadjustBlocks();
 
         uiManager.Dirty = true;
-        //Dummy.SetActive(false);
+        Dummy.SetActive(false);
     }
 
     /// <summary>
@@ -519,23 +505,8 @@ public class ConfigurationBlockManager : MonoBehaviour
 
             // Every block to the right of the block that was removed must be readjusted as
             // their indexes are no longer correct
-            List<object> per_block_type = expContainer.Data["per_block_type"] as List<object>;
-            for (int i = blockToRemove; i < Blocks.Count; i++)
-            {
-                Blocks[i].name = "Block " + i;
-
-                Blocks[i].GetComponentInChildren<Text>().text =
-                    Blocks[i].name + "\n" + Convert.ToString(per_block_type[i]);
-
-                /*
-                Blocks[i].transform.position = new Vector3(
-                    INITIAL_OFFSET + (i * BLOCK_SPACING), 0f, 0f) + transform.position;
-                */
-
-                Blocks[i].transform.SetSiblingIndex(i);
-
-                Blocks[i].GetComponent<BlockComponent>().BlockID = i;
-            }
+            //List<object> per_block_type = expContainer.Data["per_block_type"] as List<object>;
+            ReadjustBlocks(blockToRemove, Blocks.Count);
 
             // Loads the currently selected block
             if (Blocks.Count > 0)
@@ -652,29 +623,46 @@ public class ConfigurationBlockManager : MonoBehaviour
         Blocks.Insert(insertIndex + 1, g);
 
 
-        var newList = expContainer.Data["per_block_type"] as List<object>;
-
         // Fix numbering for the new block orientation
-        for (int i = 0; i < Blocks.Count; i++)
-        {
-            Blocks[i].name = "Block " + i;
-            BlockComponent blockCmp = Blocks[i].GetComponent<BlockComponent>();
-            blockCmp.BlockID = i;
-            blockCmp.Block.GetComponentInChildren<Text>().text = Blocks[i].name + "\n" + newList[i];
+        ReadjustBlocks();
 
-            Blocks[i].transform.SetSiblingIndex(i);
-        }
-
-        ResetBlockText();
+        //ResetBlockText();
         UpdateBlockButtons();
     }
 
+    public void ReadjustBlocks()
+    {
+        ReadjustBlocks(0, Blocks.Count);
+    }
+
+    /// <summary>
+    /// Fix numbering for the new block orientation.
+    /// Readjust indexes of blocks.
+    /// </summary>
+    public void ReadjustBlocks(int start, int end)
+    {
+        List<object> per_block_type = expContainer.Data["per_block_type"] as List<object>;
+
+        for (int i = start; i < end; i++)
+        {
+            Blocks[i].name = "Block " + i;
+
+            BlockComponent blockCmp = Blocks[i].GetComponent<BlockComponent>();
+
+            blockCmp.BlockID = i;
+            blockCmp.Block.GetComponentInChildren<Text>().text = Blocks[i].name + "\n" + per_block_type[i];
+
+            Blocks[i].transform.SetSiblingIndex(i);
+        }
+    }
 
     /// <summary>
     /// Sets block name, id, displayed text based on block index and per block type.
     /// </summary>
-    public void ResetBlockText()
+   /* public void ResetBlockText()
     {
+
+
         List<object> per_block_type = uiManager.ExpContainer.Data["per_block_type"] as List<object>;
 
         for (int i = 0; i < Blocks.Count; i++)
@@ -684,7 +672,7 @@ public class ConfigurationBlockManager : MonoBehaviour
             Blocks[i].GetComponent<BlockComponent>().Block.GetComponentInChildren<Text>().text =
                 Blocks[i].name + "\n" + per_block_type[i];
         }
-    }
+    }*/
 
     /// <summary>
     /// Updates the text display for the currently selected block if
@@ -749,7 +737,7 @@ public class ConfigurationBlockManager : MonoBehaviour
                 count++;
             }
 
-            ResetBlockText();
+            ReadjustBlocks();
         }
         else
         {

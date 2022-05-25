@@ -189,7 +189,7 @@ public class BlockPanel : MonoBehaviour
                 DropdownInputField.GetComponent<Dropdown>().options[option].text;
         }
 
-        uiManager.BlockView.GetComponent<ConfigurationBlockManager>().ResetBlockText();
+        uiManager.BlockView.GetComponent<ConfigurationBlockManager>().ReadjustBlocks();
         UpdateBlockPropertyText();
 
         uiManager.Dirty = true;
