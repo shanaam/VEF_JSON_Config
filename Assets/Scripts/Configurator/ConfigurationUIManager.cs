@@ -14,6 +14,8 @@ public class ConfigurationUIManager : MonoBehaviour
     // File Information
     public ExperimentContainer ExpContainer;
 
+    public UndoRedo UndoRedo;
+
     // String representation of the file currently being edited
     private string currentFile;
 
@@ -270,23 +272,25 @@ public class ConfigurationUIManager : MonoBehaviour
         Reset();
 
         tipManager.SetTip(TipManager.TipType.OpenFile);
+    }
 
-        // TODO: Set up property editor
-        /*
-        // Set up property editor
-        PropertyDropdown.GetComponent<Dropdown>().ClearOptions();
+    public void LoadFile(Dictionary<string, object> fileParameters)
+    {
+        string exp_type = fileParameters["experiment_mode"].ToString();
 
-        List<string> options = new List<string>();
-        foreach (KeyValuePair<string, object> kp in fileParameters)
+        CreateParameterList(exp_type);
+
+        foreach (KeyValuePair<string, object> kp in globalParameters)
         {
-            if (!kp.Key.StartsWith("per_block"))
-            {
-                options.Add(kp.Key);
-            }
+            if (!fileParameters.ContainsKey(kp.Key))
+                fileParameters.Add(kp.Key, kp.Value);
         }
 
-        PropertyDropdown.GetComponent<Dropdown>().AddOptions(options);
-        */
+        ExpContainer = new ExperimentContainer(fileParameters, currentParameters);
+
+        BlockView.GetComponent<ConfigurationBlockManager>().InitializeBlockPrefabs(this, ExpContainer);
+
+        BlockPanel.GetComponent<BlockPanel>().Start();
     }
 
     public void OnOpenFileConfirm(bool accept)
@@ -558,5 +562,7 @@ public class ConfigurationUIManager : MonoBehaviour
         BlockView.GetComponent<ConfigurationBlockManager>().InitializeBlockPrefabs(this, ExpContainer);
 
         BlockPanel.GetComponent<BlockPanel>().Start();
+
+        UndoRedo.Initialize(this, ExpContainer);
     }
 }

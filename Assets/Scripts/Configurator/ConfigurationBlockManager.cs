@@ -135,7 +135,7 @@ public class ConfigurationBlockManager : MonoBehaviour
         else
         {
             //Select All input
-            if (Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.A))
+            if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.A))
             {
                 if (SelectedBlocks.Count != Blocks.Count)
                 {
@@ -176,14 +176,14 @@ public class ConfigurationBlockManager : MonoBehaviour
                 InsertInstructions();
             }
             //Undo shortcut
-            else if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Z))
+            else if (/*Input.GetKey(KeyCode.LeftControl) &&*/ Input.GetKeyDown(KeyCode.Z))
             {
-                //UNDO
+                UndoRedo.instance.Undo();
             }
             //Redo shortcut
-            else if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Y))
+            else if (/*Input.GetKey(KeyCode.LeftControl) && */(Input.GetKeyDown(KeyCode.Y) || (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.Z))))
             {
-                //REDO
+                UndoRedo.instance.Redo();
             }
         }
     }
@@ -337,6 +337,8 @@ public class ConfigurationBlockManager : MonoBehaviour
     /// <param name="draggedObject"></param>
     public void OnBlockBeginDrag(GameObject draggedObject)
     {
+        UndoRedo.instance.Backup();
+
         if (!SelectedBlocks.Contains(draggedObject))
         {
             // If the user drags a block they did not highlight when the
@@ -494,6 +496,8 @@ public class ConfigurationBlockManager : MonoBehaviour
             return;
         }
 
+        UndoRedo.instance.Backup();
+
         PopUpManager.ShowPopup("Block Deleted.", PopUp.MessageType.Positive);
 
 
@@ -573,6 +577,8 @@ public class ConfigurationBlockManager : MonoBehaviour
 
     public void InsertNewBlock(GameObject notch = null, Dictionary<string, object> copiedBlock = null, int count = 0)
     {
+        UndoRedo.instance.Backup();
+
         // Instantiate prefab that represents the block in the UI
         List<object> per_block_type = expContainer.Data["per_block_type"] as List<object>;
         GameObject g = Instantiate(BlockPrefab, Content.transform);
@@ -611,10 +617,6 @@ public class ConfigurationBlockManager : MonoBehaviour
             if (kp.Key.StartsWith("per_block"))
             {
                 List<object> per_block_list = expContainer.Data[kp.Key] as List<object>;
-
-                /* object o = copiedBlock != null ?
-                     (per_block_list[copiedBlock.GetComponent<BlockComponent>().BlockID]) :
-                     expContainer.GetDefaultValue(kp.Key); //get from copied block, or from default*/
 
                 object o = copiedBlock != null ?
                    copiedBlock[kp.Key] :
