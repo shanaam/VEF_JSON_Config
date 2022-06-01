@@ -327,7 +327,7 @@ public class ConfigurationBlockManager : MonoBehaviour
     /// <param name="draggedObject"></param>
     public void OnBlockBeginDrag(GameObject draggedObject)
     {
-        UndoRedo.instance.Backup();
+
 
         if (!SelectedBlocks.Contains(draggedObject))
         {
@@ -418,6 +418,8 @@ public class ConfigurationBlockManager : MonoBehaviour
     /// <param name="draggedObject"></param>
     public void OnEndDrag(GameObject draggedObject)
     {
+        UndoRedo.instance.Backup();
+
         // Squish selected blocks to be next to each other
         int j = 1;
         foreach (GameObject g in Blocks)
@@ -581,7 +583,7 @@ public class ConfigurationBlockManager : MonoBehaviour
         int insertIndex = 0;
         if (notch != null)
         {
-            
+
             if (notch.name.Equals("AnchorNotch"))
             {
                 insertIndex = -1;

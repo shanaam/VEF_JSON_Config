@@ -42,9 +42,10 @@ public class UndoRedo : MonoBehaviour
     {
         Redos.Clear();
 
-        Debug.Log("BACKUP");
+        Debug.Log("State backup and redo stack cleared");
 
         string json = MiniJSON.Json.Serialize(ExpContainer.Data);
+        Debug.Log(json);
         Undos.Push(json);
     }
 
@@ -60,7 +61,7 @@ public class UndoRedo : MonoBehaviour
     [ContextMenu("UNDO")]
     public void Undo()
     {
-        Redos.Clear();
+        // Redos.Clear();
 
         if (Undos.Count == 0)
         {
@@ -68,10 +69,9 @@ public class UndoRedo : MonoBehaviour
             return;
         }
 
-        Debug.Log("UNDO " + Undos.Count);
-
         //put current state into redos
         string json = MiniJSON.Json.Serialize(ExpContainer.Data);
+        Debug.Log(json);
         Redos.Push(json);
 
         var state = Undos.Pop();
@@ -81,6 +81,9 @@ public class UndoRedo : MonoBehaviour
              (Dictionary<string, object>)MiniJSON.Json.Deserialize(state);
 
         uiManager.LoadFile(fileParameters);
+
+        // log unde and redo
+        //LogUndoRedo();
 
         PopUpManager.ShowPopup("Undo!", PopUp.MessageType.Positive);
     }
@@ -94,10 +97,9 @@ public class UndoRedo : MonoBehaviour
             return;
         }
 
-        Debug.Log("REDO " + Redos.Count);
-
         //put current state into undos
         string json = MiniJSON.Json.Serialize(ExpContainer.Data);
+        Debug.Log(json);
         Undos.Push(json);
 
         var state = Redos.Pop();
@@ -108,6 +110,26 @@ public class UndoRedo : MonoBehaviour
 
         uiManager.LoadFile(fileParameters);
 
+        // log undos and redos
+        //LogUndoRedo();
+
         PopUpManager.ShowPopup("Redo!", PopUp.MessageType.Positive);
+    }
+
+    public void LogUndoRedo()
+    {
+        Debug.Log("UNDOs " + Undos.Count + " REDOs:" + Redos.Count);
+
+        // peek at the last element in the undos stack
+        if (Undos.Count > 0)
+        {
+            Debug.Log("Last element in undos stack: " + Undos.Peek());
+        }
+
+        // peek at the last element in the redo stack
+        if (Redos.Count > 0)
+        {
+            Debug.Log("Last redo: " + Redos.Peek());
+        }
     }
 }
