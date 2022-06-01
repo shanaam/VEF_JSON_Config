@@ -175,16 +175,6 @@ public class ConfigurationBlockManager : MonoBehaviour
             {
                 InsertInstructions();
             }
-            //Undo shortcut
-            else if (/*Input.GetKey(KeyCode.LeftControl) &&*/ Input.GetKeyDown(KeyCode.Z))
-            {
-                UndoRedo.instance.Undo();
-            }
-            //Redo shortcut
-            else if (/*Input.GetKey(KeyCode.LeftControl) && */(Input.GetKeyDown(KeyCode.Y) || (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.Z))))
-            {
-                UndoRedo.instance.Redo();
-            }
         }
     }
 

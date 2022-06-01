@@ -26,7 +26,16 @@ public class UndoRedo : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        //Undo shortcut
+        if (/*Input.GetKey(KeyCode.LeftControl) &&*/ Input.GetKeyDown(KeyCode.Z))
+        {
+            UndoRedo.instance.Undo();
+        }
+        //Redo shortcut
+        else if (/*Input.GetKey(KeyCode.LeftControl) && */(Input.GetKeyDown(KeyCode.Y) || (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.Z))))
+        {
+            UndoRedo.instance.Redo();
+        }
     }
 
     public void Backup()
@@ -48,8 +57,11 @@ public class UndoRedo : MonoBehaviour
         Redos.Clear();
     }
 
+    [ContextMenu("UNDO")]
     public void Undo()
     {
+        Redos.Clear();
+
         if (Undos.Count == 0)
         {
             PopUpManager.ShowPopup("Nothing to Undo.", PopUp.MessageType.Negative);
@@ -68,12 +80,12 @@ public class UndoRedo : MonoBehaviour
         Dictionary<string, object> fileParameters =
              (Dictionary<string, object>)MiniJSON.Json.Deserialize(state);
 
-
         uiManager.LoadFile(fileParameters);
 
         PopUpManager.ShowPopup("Undo!", PopUp.MessageType.Positive);
     }
 
+    [ContextMenu("REDO")]
     public void Redo()
     {
         if (Redos.Count == 0)
@@ -93,7 +105,6 @@ public class UndoRedo : MonoBehaviour
         //load from redo
         Dictionary<string, object> fileParameters =
              (Dictionary<string, object>)MiniJSON.Json.Deserialize(state);
-
 
         uiManager.LoadFile(fileParameters);
 

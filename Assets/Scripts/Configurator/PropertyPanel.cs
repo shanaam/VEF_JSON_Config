@@ -36,6 +36,8 @@ public class PropertyPanel : MonoBehaviour
 
     public void SaveProperty()
     {
+        UndoRedo.instance.Backup();
+
         PropertyName = Regex.Replace(NameInput.text, @"\s+", ""); //Replaces all(+) space characters (\s) with empty("");
         PropertyValue = Regex.Replace(ValueInput.text, @"\s+", "");
 
