@@ -5,17 +5,20 @@ using System.IO;
 
 public class UndoRedo : MonoBehaviour
 {
-    public Stack<string> Undos = new Stack<string>();
-    public Stack<string> Redos = new Stack<string>();
+    public Stack<UndoRedoInfo> Undos = new Stack<UndoRedoInfo>();
+    public Stack<UndoRedoInfo> Redos = new Stack<UndoRedoInfo>();
 
     public ExperimentContainer ExpContainer;
     public ConfigurationUIManager uiManager;
     public PopUp PopUpManager;
 
-    int i = 0;
-
-
     public static UndoRedo instance;
+
+    public struct UndoRedoInfo
+    {
+        public string Data;
+        public int SelectedBlock;
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -44,18 +47,14 @@ public class UndoRedo : MonoBehaviour
 
         Debug.Log("State backup and redo stack cleared");
 
-        string json = MiniJSON.Json.Serialize(ExpContainer.Data);
-        Debug.Log(json);
-        Undos.Push(json);
+
+        Undos.Push(CreateUndoRedoInfo());
     }
 
     public void Initialize(ConfigurationUIManager uiManager, ExperimentContainer expContainer)
     {
         this.uiManager = uiManager;
         this.ExpContainer = expContainer;
-
-        Undos.Clear();
-        Redos.Clear();
     }
 
     [ContextMenu("UNDO")]
@@ -70,17 +69,16 @@ public class UndoRedo : MonoBehaviour
         }
 
         //put current state into redos
-        string json = MiniJSON.Json.Serialize(ExpContainer.Data);
-        Debug.Log(json);
-        Redos.Push(json);
-
-        var state = Undos.Pop();
+        Redos.Push(CreateUndoRedoInfo());
 
         //load backup
+        var state = Undos.Pop();
+
         Dictionary<string, object> fileParameters =
-             (Dictionary<string, object>)MiniJSON.Json.Deserialize(state);
+             (Dictionary<string, object>)MiniJSON.Json.Deserialize(state.Data);
 
         uiManager.LoadFile(fileParameters);
+        uiManager.BlockPanel.GetComponent<BlockPanel>().Populate(state.SelectedBlock);
 
         // log unde and redo
         //LogUndoRedo();
@@ -98,17 +96,16 @@ public class UndoRedo : MonoBehaviour
         }
 
         //put current state into undos
-        string json = MiniJSON.Json.Serialize(ExpContainer.Data);
-        Debug.Log(json);
-        Undos.Push(json);
+        Undos.Push(CreateUndoRedoInfo());
 
         var state = Redos.Pop();
 
         //load from redo
         Dictionary<string, object> fileParameters =
-             (Dictionary<string, object>)MiniJSON.Json.Deserialize(state);
+             (Dictionary<string, object>)MiniJSON.Json.Deserialize(state.Data);
 
         uiManager.LoadFile(fileParameters);
+        uiManager.BlockPanel.GetComponent<BlockPanel>().Populate(state.SelectedBlock);
 
         // log undos and redos
         //LogUndoRedo();
@@ -131,5 +128,23 @@ public class UndoRedo : MonoBehaviour
         {
             Debug.Log("Last redo: " + Redos.Peek());
         }
+    }
+
+    public void Clear()
+    {
+        Undos.Clear();
+        Redos.Clear();
+    }
+
+    public UndoRedoInfo CreateUndoRedoInfo()
+    {
+        string json = MiniJSON.Json.Serialize(ExpContainer.Data);
+        int selected = uiManager.CurrentSelectedBlock;
+
+        UndoRedoInfo i = new UndoRedoInfo();
+        i.Data = json;
+        i.SelectedBlock = selected;
+
+        return i;
     }
 }

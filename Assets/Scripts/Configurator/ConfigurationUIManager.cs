@@ -288,9 +288,7 @@ public class ConfigurationUIManager : MonoBehaviour
 
         ExpContainer = new ExperimentContainer(fileParameters, currentParameters);
 
-        BlockView.GetComponent<ConfigurationBlockManager>().InitializeBlockPrefabs(this, ExpContainer);
-
-        BlockPanel.GetComponent<BlockPanel>().Start();
+        SoftReset();
     }
 
     public void OnOpenFileConfirm(bool accept)
@@ -548,7 +546,7 @@ public class ConfigurationUIManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Adds all parameters in masterParameters that are associated with experimentType to currentParameters.
+    /// Initializes blockview, blockpanel, and undoredo. Defaults to showing the block tab. 
     /// Called when opening a new file, 
     /// </summary>
     public void Reset()
@@ -562,6 +560,23 @@ public class ConfigurationUIManager : MonoBehaviour
         BlockView.GetComponent<ConfigurationBlockManager>().InitializeBlockPrefabs(this, ExpContainer);
 
         BlockPanel.GetComponent<BlockPanel>().Start();
+
+        UndoRedo.Initialize(this, ExpContainer);
+        UndoRedo.Clear();
+    }
+
+    //
+    // Initializes blockview, blockpanel, and undoredo, without clearing the undo/redo stacks. 
+    // Called when undoing/redoing.
+    //
+    public void SoftReset()
+    {
+        BlockView.GetComponent<ConfigurationBlockManager>().InitializeBlockPrefabs(this, ExpContainer);
+
+        BlockPanel.GetComponent<BlockPanel>().Start();
+
+        //updates property panel visual, in case that is getting updated.
+        PropertyTab.GetComponent<PropertyPanel>().Populate();
 
         UndoRedo.Initialize(this, ExpContainer);
     }

@@ -462,6 +462,8 @@ public class ConfigurationBlockManager : MonoBehaviour
         // Fix numbering for the new block orientation
         ReadjustBlocks();
 
+        uiManager.OnClickBlock(draggedObject);
+
         uiManager.Dirty = true;
         Dummy.SetActive(false);
     }
