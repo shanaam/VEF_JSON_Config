@@ -3390,6 +3390,8 @@ MonoBehaviour:
   PropertyPanel: {fileID: 0}
   BlockPropertiesButton: {fileID: 0}
   PropertyDropdown: {fileID: 0}
+  blockParamsButtonText: Block Params
+  expParamsButtonText: Exp. Params
 --- !u!114 &509038858
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5073,7 +5075,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1015504757}
   m_HandleRect: {fileID: 1015504756}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -7796,6 +7798,7 @@ GameObject:
   - component: {fileID: 1078029545}
   - component: {fileID: 1078029544}
   - component: {fileID: 1078029543}
+  - component: {fileID: 1078029547}
   m_Layer: 5
   m_Name: DelBlockBtn
   m_TagString: Untagged
@@ -7937,6 +7940,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1078029541}
   m_CullTransparentMesh: 0
+--- !u!114 &1078029547
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1078029541}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ccd681384b16ba14b83e8db49eff63c8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  content: Del
+  visible: 0
 --- !u!1 &1078275135
 GameObject:
   m_ObjectHideFlags: 0
@@ -9361,6 +9378,7 @@ GameObject:
   - component: {fileID: 1351864833}
   - component: {fileID: 1351864835}
   - component: {fileID: 1351864834}
+  - component: {fileID: 1351864836}
   m_Layer: 5
   m_Name: Text
   m_TagString: Untagged
@@ -9411,7 +9429,7 @@ MonoBehaviour:
     m_Font: {fileID: 12800000, guid: 8e3115908ec235d438039dbac1d40964, type: 3}
     m_FontSize: 14
     m_FontStyle: 0
-    m_BestFit: 1
+    m_BestFit: 0
     m_MinSize: 10
     m_MaxSize: 40
     m_Alignment: 4
@@ -9420,7 +9438,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'Mode: Block'
+  m_Text: Exp. Params
 --- !u!222 &1351864835
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -9429,6 +9447,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1351864832}
   m_CullTransparentMesh: 0
+--- !u!114 &1351864836
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1351864832}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ccd681384b16ba14b83e8db49eff63c8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  content: Click here to switch
+  visible: 0
 --- !u!1 &1361504595
 GameObject:
   m_ObjectHideFlags: 0
@@ -9739,6 +9771,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8fa99b8472a02d8428cd8bacb136029e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  limit: 0
   uiManager: {fileID: 0}
   PopUpManager: {fileID: 776381632}
 --- !u!4 &1394143324
@@ -11762,7 +11795,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1672246266}
   m_HandleRect: {fileID: 1672246265}
   m_Direction: 0
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -11886,6 +11919,7 @@ GameObject:
   - component: {fileID: 1643557176}
   - component: {fileID: 1643557175}
   - component: {fileID: 1643557174}
+  - component: {fileID: 1643557178}
   m_Layer: 5
   m_Name: NewBlockBtn
   m_TagString: Untagged
@@ -12027,6 +12061,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1643557172}
   m_CullTransparentMesh: 0
+--- !u!114 &1643557178
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1643557172}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ccd681384b16ba14b83e8db49eff63c8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  content: Ctrl+N
+  visible: 0
 --- !u!1 &1666764176
 GameObject:
   m_ObjectHideFlags: 0

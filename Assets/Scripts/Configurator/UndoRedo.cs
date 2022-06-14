@@ -5,8 +5,10 @@ using System.IO;
 
 public class UndoRedo : MonoBehaviour
 {
-    public Stack<UndoRedoInfo> Undos = new Stack<UndoRedoInfo>();
-    public Stack<UndoRedoInfo> Redos = new Stack<UndoRedoInfo>();
+    public List<UndoRedoInfo> UndoList = new List<UndoRedoInfo>();
+    public List<UndoRedoInfo> RedoList = new List<UndoRedoInfo>();
+
+    public int stackLimit = 15;
 
     public ExperimentContainer ExpContainer;
     public ConfigurationUIManager uiManager;
@@ -14,6 +16,7 @@ public class UndoRedo : MonoBehaviour
 
     public static UndoRedo instance;
 
+    // States are stored as a UndoRedoInfo struct, containing the expcontainer data and the index of the selected block
     public struct UndoRedoInfo
     {
         public string Data;
@@ -32,23 +35,29 @@ public class UndoRedo : MonoBehaviour
         //Undo shortcut
         if (/*Input.GetKey(KeyCode.LeftControl) &&*/ Input.GetKeyDown(KeyCode.Z))
         {
-            UndoRedo.instance.Undo();
+            Undo();
         }
         //Redo shortcut
         else if (/*Input.GetKey(KeyCode.LeftControl) && */(Input.GetKeyDown(KeyCode.Y) || (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.Z))))
         {
-            UndoRedo.instance.Redo();
+            Redo();
         }
     }
 
+    /// <summary>
+    /// Call this method BEFORE any changes. 
+    /// ex: at the beginning of the paste function.
+    /// This method makes a copy of the current data, and pushes that to the Undos stack.
+    /// </summary>
     public void Backup()
     {
-        Redos.Clear();
+        RedoList.Clear();
 
-        Debug.Log("State backup and redo stack cleared");
+        //Debug.Log("State backup and redo stack cleared");
 
+        UndoList.Add(CreateUndoRedoInfo());
 
-        Undos.Push(CreateUndoRedoInfo());
+        LimitCheck();
     }
 
     public void Initialize(ConfigurationUIManager uiManager, ExperimentContainer expContainer)
@@ -58,21 +67,20 @@ public class UndoRedo : MonoBehaviour
     }
 
     [ContextMenu("UNDO")]
-    public void Undo()
+    private void Undo()
     {
-        // Redos.Clear();
-
-        if (Undos.Count == 0)
+        if (UndoList.Count == 0)
         {
             PopUpManager.ShowPopup("Nothing to Undo.", PopUp.MessageType.Negative);
             return;
         }
 
         //put current state into redos
-        Redos.Push(CreateUndoRedoInfo());
+        RedoList.Add(CreateUndoRedoInfo());
 
         //load backup
-        var state = Undos.Pop();
+        var state = UndoList[UndoList.Count - 1];
+        UndoList.RemoveAt(UndoList.Count - 1);
 
         Dictionary<string, object> fileParameters =
              (Dictionary<string, object>)MiniJSON.Json.Deserialize(state.Data);
@@ -84,21 +92,24 @@ public class UndoRedo : MonoBehaviour
         //LogUndoRedo();
 
         PopUpManager.ShowPopup("Undo!", PopUp.MessageType.Positive);
+
+        LimitCheck();
     }
 
     [ContextMenu("REDO")]
-    public void Redo()
+    private void Redo()
     {
-        if (Redos.Count == 0)
+        if (RedoList.Count == 0)
         {
             PopUpManager.ShowPopup("Nothing to Redo.", PopUp.MessageType.Negative);
             return;
         }
 
         //put current state into undos
-        Undos.Push(CreateUndoRedoInfo());
+        UndoList.Add(CreateUndoRedoInfo());
 
-        var state = Redos.Pop();
+        var state = RedoList[RedoList.Count - 1];
+        RedoList.RemoveAt(RedoList.Count - 1);
 
         //load from redo
         Dictionary<string, object> fileParameters =
@@ -111,8 +122,10 @@ public class UndoRedo : MonoBehaviour
         //LogUndoRedo();
 
         PopUpManager.ShowPopup("Redo!", PopUp.MessageType.Positive);
-    }
 
+        LimitCheck();
+    }
+/*
     public void LogUndoRedo()
     {
         Debug.Log("UNDOs " + Undos.Count + " REDOs:" + Redos.Count);
@@ -128,12 +141,21 @@ public class UndoRedo : MonoBehaviour
         {
             Debug.Log("Last redo: " + Redos.Peek());
         }
-    }
+    }*/
 
     public void Clear()
     {
-        Undos.Clear();
-        Redos.Clear();
+        UndoList.Clear();
+        RedoList.Clear();
+    }
+
+    public void LimitCheck()
+    {
+        if (UndoList.Count > stackLimit)
+            UndoList.RemoveAt(0);
+
+        if (RedoList.Count > stackLimit)
+            RedoList.RemoveAt(0);
     }
 
     public UndoRedoInfo CreateUndoRedoInfo()

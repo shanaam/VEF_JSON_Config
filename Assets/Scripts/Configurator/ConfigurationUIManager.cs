@@ -79,6 +79,8 @@ public class ConfigurationUIManager : MonoBehaviour
     public GameObject BlockPropertiesButton;
     public Dropdown PropertyDropdown;
 
+    public string blockParamsButtonText, expParamsButtonText;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -269,7 +271,7 @@ public class ConfigurationUIManager : MonoBehaviour
 
         ExpContainer = new ExperimentContainer(fileParameters, currentParameters);
 
-        Reset();
+        HardReset();
 
         tipManager.SetTip(TipManager.TipType.OpenFile);
     }
@@ -372,7 +374,7 @@ public class ConfigurationUIManager : MonoBehaviour
 
         Dirty = true;
 
-        Reset();
+        HardReset();
 
         FileDropdown.GetComponent<Dropdown>().value = 0;
 
@@ -513,11 +515,11 @@ public class ConfigurationUIManager : MonoBehaviour
 
         if (!BlockTab.activeSelf)
         {
-            SwapModeButton.GetComponentInChildren<Text>().text = "Mode: Properties";
+            SwapModeButton.GetComponentInChildren<Text>().text = expParamsButtonText;
         }
         else
         {
-            SwapModeButton.GetComponentInChildren<Text>().text = "Mode: Block";
+            SwapModeButton.GetComponentInChildren<Text>().text = blockParamsButtonText;
         }
     }
 
@@ -549,13 +551,12 @@ public class ConfigurationUIManager : MonoBehaviour
     /// Initializes blockview, blockpanel, and undoredo. Defaults to showing the block tab. 
     /// Called when opening a new file, 
     /// </summary>
-    public void Reset()
+    public void HardReset()
     {
         // Default to show the block tab
         BlockTab.SetActive(true);
         PropertyTab.SetActive(false);
-        SwapModeButton.GetComponentInChildren<Text>().text = "Mode: Block";
-
+        SwapModeButton.GetComponentInChildren<Text>().text = blockParamsButtonText;
 
         BlockView.GetComponent<ConfigurationBlockManager>().InitializeBlockPrefabs(this, ExpContainer);
 
