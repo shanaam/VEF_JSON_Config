@@ -183,19 +183,24 @@ public class ExperimentContainer
     public object ConvertToCorrectType(string input)
     {
         // If the input is a number
-        if (input.Length > 0 && input.All(char.IsDigit))
+        /*        if (input.Length > 0 && input.All(char.IsDigit))
+                {
+                    try
+                    {
+                        return int.Parse(input);
+                    }
+                    catch (System.OverflowException e)
+                    {
+                        return false;
+                    }
+                }*/
+        int intValue;
+        if (int.TryParse(input, out intValue))
         {
-            try
-            {
-                return int.Parse(input);
-            }
-            catch (System.OverflowException e)
-            {
-                return false;
-            }
+            return intValue;
         }
 
-        Regex rx = new Regex(@"[+-]?([0-9]*[.])?[0-9]+");
+/*        Regex rx = new Regex(@"[+-]?([0-9]*[.])?[0-9]+");
         if (rx.IsMatch(input) && !input.Any(x => !char.IsLetter(x)))
         {
             try
@@ -206,6 +211,12 @@ public class ExperimentContainer
             {
                 return false;
             }
+        }*/
+
+        float floatValue;
+        if (float.TryParse(input, out floatValue))
+        {
+            return floatValue;
         }
 
 

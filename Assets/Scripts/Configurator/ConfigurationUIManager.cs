@@ -14,6 +14,8 @@ public class ConfigurationUIManager : MonoBehaviour
     // File Information
     public ExperimentContainer ExpContainer;
 
+    public UndoRedo UndoRedo;
+
     // String representation of the file currently being edited
     private string currentFile;
 
@@ -77,6 +79,8 @@ public class ConfigurationUIManager : MonoBehaviour
     public GameObject BlockPropertiesButton;
     public Dropdown PropertyDropdown;
 
+    public string blockParamsButtonText, expParamsButtonText;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -85,7 +89,7 @@ public class ConfigurationUIManager : MonoBehaviour
 
         
 
-        string path = Application.dataPath + "/StreamingAssets/experiment_parameters.json";
+        string path = Application.dataPath + "/StreamingAssets/Parameters/experiment_parameters.json";
         if (File.Exists(path))
         {
             masterParameters = (Dictionary<string, object>)MiniJSON.Json.Deserialize(File.ReadAllText(
@@ -96,7 +100,7 @@ public class ConfigurationUIManager : MonoBehaviour
             Debug.LogWarning("Master JSON does not exist.");
         }
 
-        path = Application.dataPath + "/StreamingAssets/default_parameters.json";
+        path = Application.dataPath + "/StreamingAssets/Parameters/default_parameters.json";
         if (File.Exists(path))
         {
             defaultParameters = (Dictionary<string, object>)MiniJSON.Json.Deserialize(File.ReadAllText(
@@ -107,7 +111,7 @@ public class ConfigurationUIManager : MonoBehaviour
             Debug.LogWarning("Default Parameters JSON does not exist.");
         }
 
-        path = Application.dataPath + "/StreamingAssets/global_parameters.json";
+        path = Application.dataPath + "/StreamingAssets/Parameters/global_parameters.json";
         if (File.Exists(path))
         {
             globalParameters = (Dictionary<string, object>)MiniJSON.Json.Deserialize(File.ReadAllText(
@@ -257,47 +261,36 @@ public class ConfigurationUIManager : MonoBehaviour
 
         string exp_type = fileParameters["experiment_mode"].ToString();
 
-        Debug.Log(exp_type);
+        CreateParameterList(exp_type);
+
+        foreach (KeyValuePair<string, object> kp in globalParameters)
+        {
+            if (!fileParameters.ContainsKey(kp.Key))
+                fileParameters.Add(kp.Key, kp.Value);
+        }
+
+        ExpContainer = new ExperimentContainer(fileParameters, currentParameters);
+
+        HardReset();
+
+        tipManager.SetTip(TipManager.TipType.OpenFile);
+    }
+
+    public void LoadFile(Dictionary<string, object> fileParameters)
+    {
+        string exp_type = fileParameters["experiment_mode"].ToString();
 
         CreateParameterList(exp_type);
 
         foreach (KeyValuePair<string, object> kp in globalParameters)
         {
             if (!fileParameters.ContainsKey(kp.Key))
-            {
                 fileParameters.Add(kp.Key, kp.Value);
-            }
         }
 
         ExpContainer = new ExperimentContainer(fileParameters, currentParameters);
 
-        // Default to show the block tab
-        PropertyTab.SetActive(false);
-        BlockTab.SetActive(true);
-
-        BlockView.GetComponent<ConfigurationBlockManager>().InitializeBlockPrefabs(this, ExpContainer);
-
-        BlockPanel.GetComponent<BlockPanel>().Start();
-
-        tipManager.SetTip(TipManager.TipType.OpenFile);
-
-
-        // TODO: Set up property editor
-        /*
-        // Set up property editor
-        PropertyDropdown.GetComponent<Dropdown>().ClearOptions();
-
-        List<string> options = new List<string>();
-        foreach (KeyValuePair<string, object> kp in fileParameters)
-        {
-            if (!kp.Key.StartsWith("per_block"))
-            {
-                options.Add(kp.Key);
-            }
-        }
-
-        PropertyDropdown.GetComponent<Dropdown>().AddOptions(options);
-        */
+        SoftReset();
     }
 
     public void OnOpenFileConfirm(bool accept)
@@ -340,6 +333,7 @@ public class ConfigurationUIManager : MonoBehaviour
 
         foreach (KeyValuePair<string, object> kp in globalParameters)
         {
+
             temp.Add(kp.Key, kp.Value);
         }
 
@@ -380,10 +374,12 @@ public class ConfigurationUIManager : MonoBehaviour
 
         Dirty = true;
 
-        BlockView.GetComponent<ConfigurationBlockManager>().InitializeBlockPrefabs(this, ExpContainer);
+        HardReset();
+
         FileDropdown.GetComponent<Dropdown>().value = 0;
 
-        BlockPanel.GetComponent<BlockPanel>().Start();
+        //Clear dropdown text in case a file was previously open
+        FileDropdown.GetComponentInChildren<Text>().text = "";
     }
 
     /// <summary>
@@ -511,16 +507,19 @@ public class ConfigurationUIManager : MonoBehaviour
     /// </summary>
     public void SwapMode()
     {
+        if (!fileOpen)
+            return;
+
         BlockTab.SetActive(!BlockTab.activeSelf);
         PropertyTab.SetActive(!PropertyTab.activeSelf);
 
-        if (SwapModeButton.GetComponentInChildren<Text>().text.Equals("Mode: Block"))
+        if (!BlockTab.activeSelf)
         {
-            SwapModeButton.GetComponentInChildren<Text>().text = "Mode: Properties";
+            SwapModeButton.GetComponentInChildren<Text>().text = expParamsButtonText;
         }
         else
         {
-            SwapModeButton.GetComponentInChildren<Text>().text = "Mode: Block";
+            SwapModeButton.GetComponentInChildren<Text>().text = blockParamsButtonText;
         }
     }
 
@@ -546,5 +545,40 @@ public class ConfigurationUIManager : MonoBehaviour
                 currentParameters.Add(parameter, masterParameters[parameter]);
             }
         }
+    }
+
+    /// <summary>
+    /// Initializes blockview, blockpanel, and undoredo. Defaults to showing the block tab. 
+    /// Called when opening a new file, 
+    /// </summary>
+    public void HardReset()
+    {
+        // Default to show the block tab
+        BlockTab.SetActive(true);
+        PropertyTab.SetActive(false);
+        SwapModeButton.GetComponentInChildren<Text>().text = blockParamsButtonText;
+
+        BlockView.GetComponent<ConfigurationBlockManager>().InitializeBlockPrefabs(this, ExpContainer);
+
+        BlockPanel.GetComponent<BlockPanel>().Start();
+
+        UndoRedo.Initialize(this, ExpContainer);
+        UndoRedo.Clear();
+    }
+
+    //
+    // Initializes blockview, blockpanel, and undoredo, without clearing the undo/redo stacks. 
+    // Called when undoing/redoing.
+    //
+    public void SoftReset()
+    {
+        BlockView.GetComponent<ConfigurationBlockManager>().InitializeBlockPrefabs(this, ExpContainer);
+
+        BlockPanel.GetComponent<BlockPanel>().Start();
+
+        //updates property panel visual, in case that is getting updated.
+        PropertyTab.GetComponent<PropertyPanel>().Populate();
+
+        UndoRedo.Initialize(this, ExpContainer);
     }
 }

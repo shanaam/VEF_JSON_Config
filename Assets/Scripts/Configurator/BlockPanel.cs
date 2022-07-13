@@ -124,6 +124,8 @@ public class BlockPanel : MonoBehaviour
     {
         if (index == -1 || text.Length == 0) return;
 
+        UndoRedo.instance.Backup();
+
         object obj = uiManager.ExpContainer.ConvertToCorrectType(text);
 
         bool isCorrectType = false;
@@ -178,6 +180,8 @@ public class BlockPanel : MonoBehaviour
         // If user selected blank, don't edit the parameter
         if (option == 0) return;
 
+        UndoRedo.instance.Backup();
+
         BlockParameterValue.GetComponent<Text>().text = "Value: " + 
             DropdownInputField.GetComponent<Dropdown>().options[option].text;
 
@@ -189,7 +193,7 @@ public class BlockPanel : MonoBehaviour
                 DropdownInputField.GetComponent<Dropdown>().options[option].text;
         }
 
-        uiManager.BlockView.GetComponent<ConfigurationBlockManager>().ResetBlockText();
+        uiManager.BlockView.GetComponent<ConfigurationBlockManager>().ReadjustBlocks();
         UpdateBlockPropertyText();
 
         uiManager.Dirty = true;

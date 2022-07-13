@@ -25,7 +25,7 @@ public class TooltipTrigger : MonoBehaviour, IPointerEnterHandler, IPointerExitH
 
     IEnumerator Show()
     {
-        yield return new WaitForSeconds(1);
+        yield return new WaitForSeconds(0.5f);
         if (visible)
         {
             TooltipSystem.Show(content);
